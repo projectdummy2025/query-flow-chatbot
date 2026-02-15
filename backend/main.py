@@ -2,6 +2,9 @@ import os
 from typing import List
 
 from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
@@ -9,8 +12,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from backend.openrouter_client import OpenRouterError, chat, stream_chat
-
-load_dotenv()
 
 app = FastAPI(title="Query Flow Chat")
 
