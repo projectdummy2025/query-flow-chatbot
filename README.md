@@ -1,33 +1,31 @@
-# Query Flow Chat
+# Gemini Flow Chat
 
-Chatbot sederhana berbasis OpenRouter API.
-Backend dibuat dengan FastAPI (Python) dan frontend sederhana memakai HTML + JavaScript.
+Chatbot sederhana yang difokuskan sepenuhnya menggunakan Google Gemini API.
+Backend menggunakan FastAPI (Python) dan frontend menggunakan HTML + JavaScript murni.
 
-## Ringkas
+## Fitur Utama
 
-- Streaming response via SSE-style endpoint.
-- Riwayat chat disimpan di browser (client-side).
-- Konfigurasi mudah lewat environment variable.
+- **Streaming Response**: Jawaban muncul secara real-time.
+- **Gemini Focused**: Dioptimalkan khusus untuk model Gemini (Flash, Pro, Lite).
+- **Simple & Fast**: Tanpa konfigurasi provider yang rumit.
 
-## Struktur
+## Persiapan
 
-- backend/: API server + client OpenRouter.
-- frontend/: halaman chat sederhana.
-- docs/: dokumentasi dan tutorial.
+1. Salin `.env.example` menjadi `.env`.
+2. Masukkan `GEMINI_API_KEY` Anda.
+3. Instal dependensi:
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
 
-## Mulai Cepat
+## Cara Menjalankan
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r backend/requirements.txt
-export OPENROUTER_API_KEY=your_api_key_here
-uvicorn backend.main:app --reload --port 8000
+uvicorn backend.main:app --reload
 ```
 
-Buka `http://localhost:8000`.
+Buka `http://localhost:8000` di browser Anda.
 
-## Dokumentasi
+## Konfigurasi
 
-- Lihat [docs/docs.md](docs/docs.md)
-- Tutorial singkat di [docs/tutorial.md](docs/tutorial.md)
+Semua pengaturan model dan API key dikelola melalui file `.env`.
