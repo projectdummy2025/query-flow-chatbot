@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Query Flow Chat</title>
+  <title>Gemini Flow Chat</title>
   <style>
     body {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -12,48 +12,47 @@
       color: #c9d1d9;
     }
     .app {
-      max-width: 900px;
+      max-width: 800px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 40px 20px;
     }
     h1 {
-      font-size: 20px;
-      margin: 0 0 16px;
-      letter-spacing: 0.5px;
+      font-size: 24px;
+      margin-bottom: 30px;
       color: #f0f6fc;
+      text-align: center;
+      letter-spacing: 1px;
     }
     .chat {
       border: 1px solid #30363d;
       border-radius: 12px;
-      padding: 16px;
+      padding: 20px;
       background: #161b22;
-      min-height: 360px;
+      min-height: 500px;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .message {
-      padding: 8px 0;
-      border-bottom: 1px dashed #30363d;
+    .msg {
+      padding: 16px 0;
+      border-bottom: 1px solid #30363d;
+      animation: fadeIn 0.3s ease;
     }
-    .message:last-child {
-      border-bottom: none;
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .msg:last-child { border-bottom: none; }
     .role {
-      color: #7ee787;
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      font-weight: bold;
     }
-    .assistant .role {
-      color: #79c0ff;
-    }
-    .content {
-      margin-top: 6px;
-      white-space: pre-wrap;
-    }
-    .composer {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-    }
+    .role-user { color: #7ee787; }
+    .role-ai { color: #79c0ff; }
+    .content { white-space: pre-wrap; line-height: 1.6; font-size: 15px; }
+    
+    .composer { display: flex; gap: 12px; }
     textarea {
       flex: 1;
       min-height: 80px;
@@ -61,24 +60,27 @@
       color: #c9d1d9;
       border: 1px solid #30363d;
       border-radius: 8px;
-      padding: 12px;
-      resize: vertical;
+      padding: 16px;
+      resize: none;
+      font-size: 15px;
+      outline: none;
     }
+    textarea:focus { border-color: #58a6ff; }
     button {
       background: #238636;
+      color: white;
       border: none;
       border-radius: 8px;
-      color: #ffffff;
-      padding: 12px 18px;
+      padding: 0 30px;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .hint {
-      margin-top: 8px;
+    button:hover { background: #2ea043; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
       font-size: 12px;
       color: #8b949e;
     }
@@ -86,14 +88,17 @@
 </head>
 <body>
   <div class="app">
-    <h1>Query Flow Chat</h1>
+    <h1>Gemini Flow</h1>
+    
     <div id="chat" class="chat"></div>
+
     <div class="composer">
-      <textarea id="input" placeholder="Tulis pesan..."></textarea>
+      <textarea id="input" placeholder="Tanyakan sesuatu ke Gemini..."></textarea>
       <button id="send">Kirim</button>
     </div>
-    <div class="hint">Streaming aktif. Riwayat disimpan di browser selama tab ini terbuka.</div>
+    <div class="footer">Powered by Google Gemini API</div>
   </div>
+
   <script src="/static/app.js"></script>
 </body>
 </html>
