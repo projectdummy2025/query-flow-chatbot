@@ -4,101 +4,71 @@ const sendBtn = document.getElementById("send");
 
 const messages = [];
 
-function renderMessage(role, content) {
-  const container = document.createElement("div");
-  container.className = `message ${role}`;
-
-  const roleEl = document.createElement("div");
-  roleEl.className = "role";
-  roleEl.textContent = role;
-
-  const contentEl = document.createElement("div");
-  contentEl.className = "content";
-  contentEl.textContent = content;
-
-  container.appendChild(roleEl);
-  container.appendChild(contentEl);
-  chatEl.appendChild(container);
+function appendMessage(role, text) {
+  const div = document.createElement("div");
+  div.className = "msg";
+  div.innerHTML = `<div class="role role-${role}">${role === "user" ? "You" : "AI"}</div>
+                   <div class="content">${text}</div>`;
+  chatEl.appendChild(div);
   chatEl.scrollTop = chatEl.scrollHeight;
-
-  return contentEl;
+  return div.querySelector(".content");
 }
 
-function setBusy(isBusy) {
-  sendBtn.disabled = isBusy;
-  inputEl.disabled = isBusy;
-}
-
-async function streamChat() {
-  const userText = inputEl.value.trim();
-  if (!userText) return;
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text) return;
 
   inputEl.value = "";
-  messages.push({ role: "user", content: userText });
-  renderMessage("user", userText);
+  messages.push({ role: "user", content: text });
+  appendMessage("user", text);
 
-  const assistantContentEl = renderMessage("assistant", "");
-  messages.push({ role: "assistant", content: "" });
+  const contentEl = appendMessage("ai", "...");
+  let botText = "";
 
-  setBusy(true);
+  sendBtn.disabled = true;
 
   try {
-    const response = await fetch("/api/chat/stream", {
+    const resp = await fetch("/api/chat/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages })
     });
 
-    if (!response.ok || !response.body) {
-      throw new Error(`Request failed: ${response.status}`);
-    }
+    if (!resp.ok) throw new Error("Gagal terhubung ke server");
 
-    const reader = response.body.getReader();
+    const reader = resp.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "";
-    let assistantText = "";
+    contentEl.textContent = "";
 
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop();
-
+      const lines = decoder.decode(value).split("\n\n");
       for (const line of lines) {
-        if (!line.startsWith("data:")) continue;
-        let payload = line.slice(5);
-        if (payload.startsWith(" ")) {
-          payload = payload.slice(1);
+        if (line.startsWith("data: ")) {
+          const content = line.slice(6);
+          if (content === "[DONE]") break;
+          if (content.startsWith("[ERROR]")) throw new Error(content);
+          
+          botText += content;
+          contentEl.textContent = botText;
         }
-        const control = payload.trim();
-
-        if (control === "[DONE]") {
-          messages[messages.length - 1].content = assistantText;
-          return;
-        }
-
-        if (control.startsWith("[ERROR]")) {
-          assistantContentEl.textContent = control;
-          return;
-        }
-
-        assistantText += payload;
-        assistantContentEl.textContent = assistantText;
       }
     }
+    messages.push({ role: "assistant", content: botText });
   } catch (err) {
-    assistantContentEl.textContent = `Error: ${err.message}`;
+    contentEl.textContent = `Error: ${err.message}`;
   } finally {
-    setBusy(false);
+    sendBtn.disabled = false;
+    chatEl.scrollTop = chatEl.scrollHeight;
   }
 }
 
-sendBtn.addEventListener("click", streamChat);
-inputEl.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    streamChat();
+sendBtn.onclick = send;
+inputEl.onkeydown = (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
   }
-});
+};
