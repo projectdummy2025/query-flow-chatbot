@@ -1,67 +1,34 @@
 import os
 from typing import List
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
-from backend.openrouter_client import OpenRouterError, chat, stream_chat
+load_dotenv()
+print(f"DEBUG: BASE_URL={os.getenv('LLM_BASE_URL')}")
+print(f"DEBUG: MODEL={os.getenv('LLM_MODEL')}")
 
-app = FastAPI(title="Query Flow Chat")
+from backend.src.service import stream_chat
 
-app_origin = os.getenv("APP_ORIGIN")
-if app_origin:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[app_origin],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"]
-    )
-
-
-class Message(BaseModel):
-    role: str
-    content: str
-
+app = FastAPI()
 
 class ChatRequest(BaseModel):
-    messages: List[Message]
-
+    messages: List[dict]
 
 @app.get("/")
-def index() -> FileResponse:
+def index():
     return FileResponse("frontend/index.html")
-
 
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
-
-@app.post("/api/chat")
-def chat_once(payload: ChatRequest) -> dict:
-    try:
-        data = chat([message.model_dump() for message in payload.messages])
-        content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        return {"content": content}
-    except OpenRouterError as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
-
-
 @app.post("/api/chat/stream")
-def chat_stream(payload: ChatRequest) -> StreamingResponse:
+def chat_stream(payload: ChatRequest):
     def event_stream():
-        try:
-            for chunk in stream_chat([message.model_dump() for message in payload.messages]):
-                yield f"data: {chunk}\n\n"
-        except OpenRouterError as exc:
-            yield f"data: [ERROR] {str(exc)}\n\n"
-        finally:
-            yield "data: [DONE]\n\n"
+        # Sekarang hanya mengirim messages, parameter lain dihapus
+        for chunk in stream_chat(messages=payload.messages):
+            yield f"data: {chunk}\n\n"
+        yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
