@@ -1,4 +1,4 @@
-# Gemini Flow Chat
+# Query Flow Chat
 
 Chatbot sederhana yang difokuskan sepenuhnya menggunakan Google Gemini API.
 Backend menggunakan FastAPI (Python) dan frontend menggunakan HTML + JavaScript murni.
@@ -15,6 +15,7 @@ Backend menggunakan FastAPI (Python) dan frontend menggunakan HTML + JavaScript 
 2. Masukkan `GEMINI_API_KEY` Anda.
 3. Instal dependensi:
    ```bash
+   source .venv/bin/activate
    pip install -r backend/requirements.txt
    ```
 

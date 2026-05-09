@@ -37,7 +37,7 @@ def stream_chat(messages) -> Generator[str, None, None]:
             
             for line in resp.iter_lines():
                 if not line.startswith("data: "): continue
-                data = line[6:].strip()
+                data = line[6:] # Preserve all characters including spaces
                 if data == "[DONE]": break
                 
                 try:
